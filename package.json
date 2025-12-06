@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/Gautam297/team-chat-app/issues"
   },
-  "homepage": "https://github.com/Gautam297/team-chat-app#readme"
+  "homepage": "https://github.com/Gautam297/team-chat-app#readme",
+  "dependencies": {
+    "react-router-dom": "^7.10.1"
+  }
 }
