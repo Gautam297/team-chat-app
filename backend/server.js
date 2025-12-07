@@ -17,7 +17,7 @@ const supabase = createClient(
 // Socket.io setup with CORS
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173", // Frontend URL
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
