@@ -35,13 +35,27 @@ function Chat() {
     setProfile(userProfile);
 
     // Initialize socket connection
-    const newSocket = io(SOCKET_URL);
-    setSocket(newSocket);
+    // Initialize socket connection
+const newSocket = io(SOCKET_URL, {
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 10
+});
+setSocket(newSocket);
 
-    newSocket.on('connect', () => {
-      console.log('Connected to WebSocket');
-      newSocket.emit('user-online', user.id);
-    });
+newSocket.on('connect', () => {
+  console.log('Connected to WebSocket');
+  newSocket.emit('user-online', user.id);
+});
+
+newSocket.on('disconnect', () => {
+  console.log('Disconnected from WebSocket');
+});
+
+newSocket.on('connect_error', (error) => {
+  console.error('Connection error:', error);
+});
 
     return () => {
       newSocket.disconnect();
@@ -129,14 +143,37 @@ function Chat() {
   };
 
   const handleSendMessage = (content) => {
-    if (!socket || !currentChannel || !currentUser) return;
-
-    socket.emit('send-message', {
-      channelId: currentChannel.id,
-      userId: currentUser.id,
-      content
+  if (!socket || !currentChannel || !currentUser) {
+    console.error('Cannot send message - missing requirements', {
+      hasSocket: !!socket,
+      hasChannel: !!currentChannel,
+      hasUser: !!currentUser
     });
-  };
+    return;
+  }
+
+  if (!socket.connected) {
+    console.error('Socket not connected, reconnecting...');
+    socket.connect();
+    setTimeout(() => {
+      if (socket.connected) {
+        socket.emit('send-message', {
+          channelId: currentChannel.id,
+          userId: currentUser.id,
+          content
+        });
+      }
+    }, 1000);
+    return;
+  }
+
+  console.log('Sending message:', content);
+  socket.emit('send-message', {
+    channelId: currentChannel.id,
+    userId: currentUser.id,
+    content
+  });
+};
 
   const handleCreateChannel = async () => {
     const name = prompt('Enter channel name:');
