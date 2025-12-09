@@ -69,34 +69,43 @@ newSocket.on('connect_error', (error) => {
   }, []);
 
   // Socket event listeners
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  if (!socket) return;
 
-    socket.on('new-message', (message) => {
-      if (message.channel_id === currentChannel?.id) {
-        setMessages((prev) => [...prev, message]);
-      }
-    });
+  socket.on('new-message', (message) => {
+    console.log('Received new message:', message);
+    console.log('Current channel:', currentChannel?.id);
+    console.log('Message channel:', message.channel_id);
+    
+    if (message.channel_id === currentChannel?.id) {
+      console.log('Adding message to state');
+      setMessages((prev) => [...prev, message]);
+    } else {
+      console.log('Message for different channel, ignoring');
+    }
+  });
 
-    socket.on('user-status-changed', () => {
-      loadOnlineUsers();
-    });
+  socket.on('user-status-changed', () => {
+    console.log('User status changed');
+    loadOnlineUsers();
+  });
 
-    socket.on('user-typing', (data) => {
-      if (data.channelId === currentChannel?.id && data.userId !== currentUser?.id) {
-        setTypingUsers((prev) => [...new Set([...prev, data.userName])]);
-        setTimeout(() => {
-          setTypingUsers((prev) => prev.filter((name) => name !== data.userName));
-        }, 3000);
-      }
-    });
+  socket.on('user-typing', (data) => {
+    console.log('User typing:', data);
+    if (data.channelId === currentChannel?.id && data.userId !== currentUser?.id) {
+      setTypingUsers((prev) => [...new Set([...prev, data.userName])]);
+      setTimeout(() => {
+        setTypingUsers((prev) => prev.filter((name) => name !== data.userName));
+      }, 3000);
+    }
+  });
 
-    return () => {
-      socket.off('new-message');
-      socket.off('user-status-changed');
-      socket.off('user-typing');
-    };
-  }, [socket, currentChannel, currentUser]);
+  return () => {
+    socket.off('new-message');
+    socket.off('user-status-changed');
+    socket.off('user-typing');
+  };
+}, [socket, currentChannel, currentUser]);
 
   const loadChannels = async () => {
     try {
