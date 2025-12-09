@@ -134,9 +134,9 @@ newSocket.on('connect_error', (error) => {
     
     // Load messages
     try {
-      const msgs = await api.getMessages(channel.id);
+      const msgs = await api.getMessages(channel.id, 10, 0);
       setMessages(msgs);
-      setHasMore(msgs.length >= 50);
+      setHasMore(msgs.length >= 10);
     } catch (error) {
       console.error('Failed to load messages:', error);
     }
@@ -194,9 +194,9 @@ newSocket.on('connect_error', (error) => {
 
     try {
       const offset = messages.length;
-      const olderMessages = await api.getMessages(currentChannel.id, 50, offset);
+    const olderMessages = await api.getMessages(currentChannel.id, 10, offset);
       
-      if (olderMessages.length < 50) {
+      if (olderMessages.length < 10) {
         setHasMore(false);
       }
       
